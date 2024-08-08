@@ -1,0 +1,54 @@
+<!-- templates/new_conversation.html -->
+{% extends 'core/base.html' %}
+{% block title %}
+Inbox
+{% endblock %} 
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+    <h2 class="text-3xl font-semibold text-gray-800 mb-6">Inbox</h2>
+    
+    {% if conversations %}
+        <ul class="space-y-4">
+            {% for conversation in conversations %}
+            {% with conversation.messages.last as last_message %}
+            <li class="flex items-center p-4 rounded-lg shadow hover:bg-gray-200
+
+                {% if last_message.is_read == False and last_message.created_by != request.user %} bg-yellow-100 {% else %} bg-gray-100 {% endif %}">
+                <img src="{{ conversation.item.image.url }}" alt="{{ conversation.item.title }}" class="w-16 h-16 rounded-md object-cover mr-4">
+                
+                <div class="flex-grow">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <a href="{% url 'message-details' conversation.id %}" class="hover:text-blue-600">
+                            {{ conversation.item.title }}
+                        </a>
+                    </h3>
+                    <h4 class="text-lg font-semibold text-gray-800">
+                        {% for item in conversation_data %}
+                        {% for member in item.members %}
+                            {% if item.conversation.id == conversation.id and conversation.item.user.username != member.username %}
+                                {% if member != request.user %}
+                                    {{ member.username|capfirst }}
+                                {% else %}
+                                    <span class="text-green-500">Sent by me</span>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                    </h4>
+                    <p class="text-sm text-gray-600">
+                        Seller: {{ conversation.item.user.username|capfirst }}
+                    </p>
+                </div>
+                
+                <div class="text-sm text-gray-500">
+                    Last updated: {{ conversation.modified_at|date:"F j, Y, g:i a" }}
+                </div>
+            </li>
+            {% endwith %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-gray-600">No conversations found.</p>
+    {% endif %}
+</div>
+{% endblock %}

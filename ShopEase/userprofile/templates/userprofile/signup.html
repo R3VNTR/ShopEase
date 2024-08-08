@@ -1,0 +1,57 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Signup{% endblock %}
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'userprofile/css/form.css' %}" />
+{% endblock%}
+{% block content %}
+    <!-- Sign Up Form -->
+    <section class="flex justify-center items-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+        <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Create an Account</h2>
+            <form method="POST" action="." class="space-y-6">
+                {% csrf_token %}
+                
+                {{ form.non_field_errors }}
+
+                <div class="form-control {% if form.username.errors %} invalid {% endif %}">
+                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <p class="text-red-600 text-sm">{{ form.username.errors }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="form-control {% if form.email.errors %} invalid {% endif %}">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="text-red-600 text-sm">{{ form.email.errors }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="form-control {% if form.password1.errors %} invalid {% endif %}">
+                    <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium text-gray-700">Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <p class="text-red-600 text-sm">{{ form.password1.errors }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="form-control {% if form.password2.errors %} invalid {% endif %}">
+                    <label for="{{ form.password2.id_for_label }}" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <p class="text-red-600 text-sm">{{ form.password2.errors }}</p>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg shadow hover:from-blue-600 hover:to-purple-700 transition duration-300">Sign Up</button>
+            </form>
+            
+            <p class="text-center text-sm text-gray-600 mt-4">Already have an account? 
+                <a href="{% url 'login' %}" class="text-blue-600 hover:underline">Log in</a>
+            </p>
+        </div>
+    </section>
+{% endblock %}

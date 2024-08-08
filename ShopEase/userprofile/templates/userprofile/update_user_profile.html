@@ -1,0 +1,77 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Update My Account{% endblock %}
+
+{% block content %}
+<section class="container mx-auto px-4 py-8">
+    <div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
+        <!-- Profile Image -->
+        <div class="flex justify-center mb-6">
+            {% if user.userprofile.profile_image %}
+                <img src="{{ user.userprofile.profile_image.url }}" alt="{{ user.username }}" class="w-24 h-24 object-cover rounded-full">
+            {% else %}
+                <img src="https://via.placeholder.com/100x100" alt="{{ user.username }}" class="w-24 h-24 object-cover rounded-full">
+            {% endif %}
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-4">
+                {{ form.first_name.label_tag }}
+                {{ form.first_name }}
+            </div>
+        
+            <div class="mb-4">
+                {{ form.last_name.label_tag }}
+                {{ form.last_name }}
+            </div>
+        
+            <div class="mb-4">
+                {{ form.contact.label_tag }}
+                {{ form.contact }}
+            </div>
+        
+            <div class="mb-4">
+                {{ form.bio.label_tag }}
+                {{ form.bio }}
+            </div>
+        
+            <div class="mb-4">
+                {{ form.country.label_tag }}
+                {{ form.country }}
+            </div>
+        
+            <div class="mb-4">
+                {{ form.address.label_tag }}
+                {{ form.address }}
+            </div>
+        
+            <div class="mb-4">
+                {{ form.zip_code.label_tag }}
+                {{ form.zip_code }}
+            </div>
+        
+            <div class="mb-4">
+                {{ form.city.label_tag }}
+                {{ form.city }}
+            </div>
+        
+            <div class="mb-4">
+                {{ form.profile_image.label_tag }}
+                {{ form.profile_image }}
+            </div>
+            
+            <!-- Form Buttons -->
+            <div class="flex justify-between items-center mt-6">
+                <a href="{% url 'myaccount' %}" class="bg-gray-500 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-600 transition duration-300 ease-in-out">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-600 transition duration-300 ease-in-out">
+                    Update Profile
+                </button>
+            </div>    
+            
+        </form>
+    </div>
+</section>
+
+{% endblock %}

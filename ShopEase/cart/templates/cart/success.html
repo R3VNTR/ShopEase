@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+
+{% block title%}
+Sucess
+{% endblock %}
+
+{% block content %}
+<main class="container mx-auto px-4 py-6">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center py-6 px-6 xl:px-0">
+        <div class="w-full lg:w-3/4 bg-green-50 border border-green-200 text-green-800 p-6 rounded-xl shadow-md">
+            <h1 class="text-3xl font-bold mb-4">Success</h1>
+            <p class="text-lg mb-4">Thanks for making the purchase!</p>
+            <p class="text-sm">Your order is being processed and you will receive a confirmation email shortly. If you have any questions, feel free to <a href="mailto:support@example.com" class="text-green-600 hover:underline">contact us</a>.</p>
+            <a href="{% url 'frontpage' %}" class="inline-block mt-4 px-6 py-3 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition duration-300">Back to Home</a>
+        </div>
+    </div>
+</main>
+{% endblock %}

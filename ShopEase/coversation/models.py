@@ -1,0 +1,27 @@
+from django.db import models
+from store.models import Product
+from django.contrib.auth.models import User
+# Create your models here.
+
+class Conversation(models.Model):
+    item = models.ForeignKey(Product, related_name='conversations', on_delete=models.CASCADE)
+    members = models.ManyToManyField(User, related_name='conversations')
+    created_at = models.DateTimeField(auto_now=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+    def get_latest_message(self):
+        return self.messages.order_by('-created_at').first()
+
+    class Meta:
+        ordering = ('-modified_at',)
+
+class ConversationMessage(models.Model):
+    conversation =  models.ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, related_name='create_messags', on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False) 
+
+
+    # class Meta:
+    #     ordering = ('-created_at',)

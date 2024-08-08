@@ -1,0 +1,106 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% firstof userx.get_full_name userx.username %}{% endblock %}
+
+{% block content %}
+    <section class="container mx-auto px-4 py-8">
+        <div class="mb-6 bg-white shadow-lg rounded-lg p-6 relative">
+            <h3 class="text-3xl font-bold text-gray-900 mb-6 border-b pb-4">Vendor Information</h3>
+        
+            <div class="flex items-center space-x-6">
+                {% if userx.userprofile.profile_image %}
+                    <img src="{{ userx.userprofile.profile_image.url }}" alt="{{ userx.username }}" class="w-28 h-28 object-cover rounded-full border-4 border-blue-500 shadow-lg">
+                {% else %}
+                    <img src="https://via.placeholder.com/100x100" alt="{{ userx.username }}" class="w-28 h-28 object-cover rounded-full border-4 border-gray-300 shadow-lg">
+                {% endif %}
+                
+                <div>
+                    <p class="text-2xl font-semibold text-gray-900">{% firstof userx.get_full_name userx.username %}</p>
+                    <p class="text-gray-700 mb-2 italic">{{ userx.userprofile.bio }}</p>
+                    <p class="text-gray-700"><strong>Email:</strong> {{ userx.email }}</p>
+                    <p class="text-gray-700"><strong>Contact: </strong>{{ userx.userprofile.contact }}</p>
+                    <p class="text-gray-700"><strong>City: </strong>{{ userx.userprofile.city }}</p>
+                    <p class="text-gray-700"><strong>Country: </strong>{{ userx.userprofile.country.name }}</p>
+                    <p class="text-gray-700"><strong>Joined: </strong>{{ userx.date_joined |date:"F j, Y" }}</p>
+                </div>
+            </div>
+        
+            {% if highest_review %}
+            <div class="mt-6 bg-blue-50 p-4 rounded-lg shadow">
+                <h4 class="text-xl font-bold text-blue-600">Highest Rated Review</h4>
+                <p class="text-gray-800 mt-2"><strong>Product:</strong> {{ highest_review.product.title }}</p>
+                <p class="text-gray-800 mt-2"><strong>Rating:</strong> 
+                    <div class="flex items-center">
+                        {% for i in star_ratings %}
+                            <span class="text-xl {% if i <= highest_review.rating %}text-yellow-400{% else %}text-gray-300{% endif %}">★</span>
+                        {% endfor %}
+                        {% if highest_review.rating == None%}
+                            <p class="ml-1 text-yellow-500">No reviews yet<p>
+                        {% elif highest_review.rating == 1 %}
+                            <p class="ml-1 text-red-500">{{highest_review.rating }}<p>    
+                        {% elif highest_review.rating < 4 %}
+                            <p class="ml-1 text-yellow-500">{{highest_review.rating }}<p>
+                        {% else %}
+                            <p class="ml-1 text-green-500">{{highest_review.rating }}<p>        
+                        {% endif %}       
+                    </div>
+                </p>
+                <p class="text-gray-700 mt-1"><strong>Review:</strong> {{ highest_review.content }}</p>
+                <p class="text-gray-800 mt-2"><strong>Review By:</strong> {{ highest_review.created_by.username }}</p>
+                <p class="text-sm text-gray-500 mt-1"><strong>Date:</strong> {{ highest_review.created_at|date:"F j, Y" }}</p>
+            </div>
+            {% endif %}
+        
+        </div>
+        
+
+        {%if products.exists %} 
+        <!-- Vendor's products -->
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">{% firstof userx.get_full_name userx.username %}'s Products</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for product in products %}
+                <div class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <a href="{% url 'product_detail' product.category.slug product.slug %}" >
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.title }}" class="w-full h-48 object-cover">
+                        {% else %}
+                            <img src="https://via.placeholder.com/300x200" alt="{{ product.title }}" class="w-full h-48 object-cover">
+                        {% endif %}
+                        <div class="p-4">
+                            <h3 class="text-lg font-bold text-gray-800">{{ product.title }}</h3>
+                            <p class="text-gray-600">{{ product.description|truncatewords:20 }}</p>
+                            <p class="text-gray-900 font-semibold">${{ product.get_display_price }}</p>
+                            <p class="text-lg font-bold text-gray-900 mt-4">{% include 'store/include/review.html'%} </p>
+                        </div>
+                    </a>
+                    <div class="flex justify-end p-4">
+                        {% if product.user.username != user.username and user.is_authenticated %}
+                            <a 
+                            href="#" 
+                            hx-get="{% url 'add-to-cart' product.id %}"
+                            hx-target="#menu-cart-button"
+                            hx-swap="outerHTML"
+                            class="text-navy-500 hover:text-navy-700"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </a>
+                        {%else%}
+                            
+                            {% if user.is_authenticated%}
+                            <p class="text-sm text-green-700 font-semibold">
+                                This is your product.
+                            </p>
+                            {% endif %}
+                        
+                        {% endif %}
+        
+                    </div>
+                </div>   
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+
+{% endblock %}

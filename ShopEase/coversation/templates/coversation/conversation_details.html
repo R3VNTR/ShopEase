@@ -1,0 +1,47 @@
+<!-- templates/new_conversation.html -->
+{% extends 'core/base.html' %}
+{% block title %}
+Conversation
+{% endblock %} 
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Conversation with {{ conversation.item.user.username | capfirst }}</h2>
+    
+    <!-- Product Information -->
+    <div class="flex items-center mb-6">
+        <img src="{{ conversation.item.image.url }}" alt="{{ conversation.item.title }}" class="w-16 h-16 rounded-md object-cover mr-4">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-800">{{ conversation.item.title }}</h3>
+            <p class="text-sm text-gray-600">Seller: {{ conversation.item.user.username | capfirst }}</p>
+        </div>
+    </div>
+    
+    <!-- Messages -->
+    <div class="space-y-4 mb-6">
+        {% for message in conversation.messages.all %}
+        <div class="flex items-start {% if message.created_by == user %}justify-end{% else %}justify-start{% endif %}">
+            <div class="max-w-md p-4 {% if message.created_by == user %}bg-blue-500 text-white{% else %}bg-gray-100 text-gray-800{% endif %} rounded-lg shadow-md">
+                <p>{{ message.content }}</p>
+                <p class="text-xs mt-2 text-gray-500">{{ message.created_at|date:"F j, Y, g:i a" }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Message Form -->
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-4">
+            {{ form.content }}
+        </div>
+        <div class="flex justify-end">
+            <a href="{% url 'inbox-message' %}" class="px-4 py-2 bg-gray-500 text-white rounded-md mr-4 hover:bg-gray-600">
+                Back to Inbox
+            </a>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                Send Message
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

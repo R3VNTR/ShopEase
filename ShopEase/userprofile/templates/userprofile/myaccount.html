@@ -1,0 +1,99 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% firstof user.get_full_name user.username %}{% endblock %}
+
+{% block content %}
+    <section class="container mx-auto px-4 py-8">
+        {% if messages %}
+                <div class="space-y-4 mt-6 mb-6">
+                    {% for message in messages %}
+                        <div class="relative p-4 rounded-lg shadow 
+                                    {% if message.tags == 'error' %} bg-red-100 text-red-700 border border-red-400 
+                                    {% elif message.tags == 'success' %} bg-green-100 text-green-700 border border-green-400 
+                                    {% elif message.tags == 'info' %} bg-blue-100 text-blue-700 border border-blue-400 
+                                    {% elif message.tags == 'warning' %} bg-yellow-100 text-yellow-700 border border-yellow-400 
+                                    {% else %} bg-gray-100 text-gray-700 border border-gray-400 
+                                    {% endif %}">
+                            <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-800" onclick="this.parentElement.remove()">
+                                &times;
+                            </button>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        
+            <div class="mb-6 bg-white shadow-lg rounded-lg p-6 relative">
+                <!-- Update Button -->
+                <a href="{% url 'update_my_profile' %}" class="absolute top-4 right-4 bg-blue-600 text-white text-sm px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 ease-in-out">
+                    Update Profile
+                </a>
+            
+                <h3 class="text-3xl font-bold text-gray-900 mb-6 border-b pb-4">User Information</h3>
+            
+                <div class="flex items-center space-x-6">
+                    {% if user.userprofile.profile_image %}
+                        <img src="{{ user.userprofile.profile_image.url }}" alt="{{ user.username }}" class="w-28 h-28 object-cover rounded-full border-4 border-blue-500 shadow-lg">
+                    {% else %}
+                        <img src="https://via.placeholder.com/100x100" alt="{{ user.username }}" class="w-28 h-28 object-cover rounded-full border-4 border-gray-300 shadow-lg">
+                    {% endif %}
+                    
+                    <div>
+                        <p class="text-2xl font-semibold text-gray-900">{% firstof user.get_full_name user.username %}</p>
+                        <p class="text-gray-700 mb-2 italic">{{ user.userprofile.bio }}</p>
+                        <p class="text-gray-700"><strong>Email:</strong> {{ user.email }}</p>
+                        <p class="text-gray-700"><strong>Contact: </strong>{{ user.userprofile.contact }}</p>
+                        <p class="text-gray-700"><strong>Address: </strong>{{ user.userprofile.address }}</p>
+                        <p class="text-gray-700"><strong>Zip code: </strong>{{ user.userprofile.zip_code }}</p>
+                        <p class="text-gray-700"><strong>City: </strong>{{ user.userprofile.city }}</p>
+                        <p class="text-gray-700"><strong>Country: </strong>{{ user.userprofile.country.name }}</p>
+                        <p class="text-gray-700"><strong>Joined: </strong>{{ user.date_joined |date:"F j, Y" }}</p>
+                        {% if user.userprofile.is_seller %}
+                            <p class="mt-4 inline-flex items-center bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Seller
+                            </p>
+                        {% else %}
+                            <p class="mt-4 inline-flex items-center bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Not a Seller
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if highest_review %}
+                <div class="mt-6 bg-blue-50 p-4 rounded-lg shadow">
+                    <h4 class="text-xl font-bold text-blue-600">Highest Rated Review</h4>
+                    <p class="text-gray-800 mt-2"><strong>Product:</strong> {{ highest_review.product.title }}</p>
+                    <p class="text-gray-800 mt-2"><strong>Rating:</strong> 
+                        <div class="flex items-center">
+                            {% for i in star_ratings %}
+                                <span class="text-xl {% if i <= highest_review.rating %}text-yellow-400{% else %}text-gray-300{% endif %}">★</span>
+                            {% endfor %}
+                            {% if highest_review.rating == None%}
+                                <p class="ml-1 text-yellow-500">No reviews yet<p>
+                            {% elif highest_review.rating == 1 %}
+                                <p class="ml-1 text-red-500">{{highest_review.rating }}<p>    
+                            {% elif highest_review.rating < 4 %}
+                                <p class="ml-1 text-yellow-500">{{highest_review.rating }}<p>
+                            {% else %}
+                                <p class="ml-1 text-green-500">{{highest_review.rating }}<p>        
+                            {% endif %}       
+                        </div>
+                    </p>
+                    <p class="text-gray-700 mt-1"><strong>Review:</strong> {{ highest_review.content }}</p>
+                    <p class="text-gray-800 mt-2"><strong>Review By:</strong> {{ highest_review.created_by.username }}</p>
+                    <p class="text-sm text-gray-500 mt-1"><strong>Date:</strong> {{ highest_review.created_at|date:"F j, Y" }}</p>
+                </div>
+            {% endif %}
+            </div>
+
+         {% include "userprofile/my_store.html" %}
+    </section>
+
+{% endblock %}

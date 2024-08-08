@@ -1,0 +1,114 @@
+{% extends 'core/base.html' %}
+
+{% block title %}
+Search - ShopEase
+{% endblock %} 
+
+{% block content %}
+    <main class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4 text-center">Search Results for <b class="font-bold text-blue-700">{{ query }}</b></h1>
+        {% if products or vendors or categories %}
+        {% comment %} Products {% endcomment %}
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8 text-center">Products</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if products %}
+                {% for product in products %}
+                    <div class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                        <a href="{% url 'product_detail' product.category.slug product.slug %}" class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                            <div>
+                                <div class="relative">
+                                
+                                    <img src="{{ product.image.url }}" alt="{{ product.title }}" class="w-full h-48 object-cover">
+                                    <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center text-white text-xl font-semibold">
+                                        <span>{{ product.title }}</span>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h2 class="text-2xl font-semibold text-gray-800">{{ product.title }}</h2>
+                                    <p class="text-gray-600 mt-2">{{ product.description|slice:":100" }}{% if product.description|length > 100 %}...{% endif %}</p>
+                                    <p class="text-lg font-bold text-gray-900 mt-4">${{ product.get_display_price }}</p>
+                                    <p class="text-sm text-gray-500 mt-2">Category: {{ product.category }}</p>
+                                    <p class="text-sm text-gray-500 mt-2">
+                                        {% include 'store/include/review.html'%} 
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="flex justify-end p-4">
+                            {% if product.user.username != user.username and user.is_authenticated %}
+                                <a 
+                                href="#" 
+                                hx-get="{% url 'add-to-cart' product.id %}"
+                                hx-target="#menu-cart-button"
+                                hx-swap="outerHTML"
+                                class="text-navy-500 hover:text-navy-700"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                    </svg>
+                                </a>
+                            {%else%}
+                                
+                                {% if user.is_authenticated%}
+                                <p class="text-sm text-green-700 font-semibold">
+                                    This is your product.
+                                </p>
+                                {% endif %}
+                            
+                            {% endif %}
+              
+                        </div>
+                    </div>   
+                {% endfor %}
+            {% else %}
+                <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-200 dark:text-red-400" role="alert">
+                    <span class="font-medium">No products found for "{{ query }}"</span>
+                </div>
+            {% endif %}
+        </div>
+
+        {% comment %} Categories {% endcomment %}
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8 text-center">Categories</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if categories %}
+                {% for category in categories %}
+                <a href="{% url 'category_detail' category.slug %}" class="block bg-white shadow-md rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-gray-800">{{category.title}}</h3>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-200 dark:text-red-400" role="alert">
+                <span class="font-medium">No categories found for "{{ query }}"</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% comment %} Vendors {% endcomment %}
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8 text-center">Vendors</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if vendors %}
+                {% for vendor in vendors %}
+                    <a href="{% url 'vendor-details' vendor.user.id %}" class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                            <div class="p-4">
+                                <h2 class="text-2xl font-semibold text-gray-800">{{ vendor.user.username }}</h2>
+                                <p class="text-gray-600 mt-2">{{ vendor.description|slice:":100" }}{% if vendor.description|length > 100 %}...{% endif %}</p>
+                            </div>
+                        </div>
+                    </a>    
+                {% endfor %}
+            {% else %}
+            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-200 dark:text-red-400" role="alert">
+                <span class="font-medium">No vendors found for "{{ query }}"</span>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-200 dark:text-red-400" role="alert">
+                <span class="font-medium">No products or categories vendors found for "{{ query }}"</span>
+            </div>
+        {% endif %}
+    </main>
+{% endblock %}

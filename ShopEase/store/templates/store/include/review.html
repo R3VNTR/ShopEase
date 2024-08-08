@@ -1,0 +1,14 @@
+<div class="flex items-center">
+    {% for i in star_ratings %}
+        <span class="text-xl {% if i <= product.get_rating %}text-yellow-400{% else %}text-gray-300{% endif %}">★</span>
+    {% endfor %}
+    {% if product.get_rating == 'No reviews yet'%}
+        <p class="ml-1 text-yellow-500">{{product.get_rating }}<p>
+    {% elif product.get_rating == 1 %}
+        <p class="ml-1 text-red-500">{{product.get_rating }}<p>    
+    {% elif product.get_rating < 4 %}
+        <p class="ml-1 text-yellow-500">{{product.get_rating }}<p>
+    {% else %}
+        <p class="ml-1 text-green-500">{{product.get_rating }}<p>        
+    {% endif %}       
+</div>

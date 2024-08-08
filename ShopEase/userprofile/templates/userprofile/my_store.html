@@ -1,0 +1,236 @@
+{% load static %}
+{% if user.is_authenticated  and user.userprofile.is_seller %}
+        <main class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold">My Dashboard</h1>
+                <a href="{% url 'add-product' %}" class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition duration-300 ease-in-out">
+                    Add an item
+                </a>
+            </div>
+            <!-- Product List -->
+
+            <div class="mb-6">
+                <h2 class="text-2xl font-semibold mb-4">Your Products</h2>
+                <!-- Tab Navigation -->
+                <div class="flex space-x-4 mb-4">
+                    <button id="active-tab" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Active Products
+                    </button>
+                    <button id="deleted-tab" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Deleted Products
+                    </button>
+                    <button id="myorder-tab" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        My Orders
+                    </button>
+                    <button id="salesorders-tab" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Sales Orders
+                    </button>
+                    
+                </div>
+            
+                <!-- Tab Content -->
+                <div id="active-content" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for product in products %}
+                            <a href="{% url 'product_detail' product.category.slug product.slug %}" class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                                    <img src="{{ product.image.url }}" alt="{{ product.title }}" class="w-full h-32 object-cover">
+                                    <div class="p-4">
+                                        <h3 class="text-xl font-semibold">{{ product.title }}</h3>
+                                        <p class="text-gray-600 mt-2">{{ product.description|slice:":100" }}{% if product.description|length > 100 %}...{% endif %}</p>
+                                        <p class="text-lg font-bold text-gray-900 mt-4">${{ product.get_display_price }}</p>
+                                        <p class="text-lg font-bold text-gray-900 mt-4">{% include 'store/include/review.html'%} </p>
+                                        <hr class="my-4 border-gray-200">
+                                        <div class="mt-2">
+                                            <p class="text-gray-700 font-medium">Status:</p>
+                                            <p class="text-sm mt-1">
+                                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded">{{ product.get_status_display }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% empty %}
+                            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-200 dark:text-red-400" role="alert">
+                                <span class="font-medium">No active products listed yet.</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            
+                <div id="deleted-content" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for product in deleted_products %}
+                                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                                    <img src="{{ product.image.url }}" alt="{{ product.title }}" class="w-full h-32 object-cover">
+                                    <div class="p-4">
+                                        <h3 class="text-xl font-semibold">{{ product.title }}</h3>
+                                        <p class="text-gray-600 mt-2">{{ product.description|slice:":100" }}{% if product.description|length > 100 %}...{% endif %}</p>
+                                        <p class="text-lg font-bold text-gray-900 mt-4">${{ product.get_display_price }}</p>
+                                        <p class="text-lg font-bold text-gray-900 mt-4">{% include 'store/include/review.html'%} </p>
+                                        <hr class="my-4 border-gray-200">
+                                        <div class="flex items-center justify-between mt-2">
+                                            <div>
+                                                <p class="text-gray-700 font-medium">Status:</p>
+                                                <p class="text-sm mt-1">
+                                                    <span class="bg-red-100 text-red-700 px-2 py-1 rounded">{{ product.get_status_display }}</span>
+                                                </p>
+                                            </div>
+                                            
+                                            <form action="{% url 'recover-product' product.pk %}" method="post" class="ml-4">
+                                                {% csrf_token %}
+                                                <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow hover:bg-yellow-600 transition duration-300 ease-in-out">
+                                                    Undo
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                        {% empty %}
+                            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-200 dark:text-red-400" role="alert">
+                                <span class="font-medium">No deleted products listed yet.</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+
+                {% comment %} My orders {% endcomment %}
+                
+                <div id="myorder-content" class="tab-content hidden">
+                    <h2 class="my-6 text-2xl font-semibold text-gray-900">My Orders</h2>
+                    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                        <table class="min-w-full bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Order ID</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Product</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Quantity</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Item Price</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action Date</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700 text-sm">
+                                {% for order in request.user.orders.all %}
+                                <tr>
+                                    <td class="px-6 py-4 border-b border-gray-300 font-medium" rowspan="{{ order.items.count }}">
+                                        {{ order.id }}
+                                        <br>
+                                        <span class="text-xs text-gray-500">Date: {{ order.created_at|date:"M d, Y" }}</span>
+                                    </td>
+                                    {% for item in order.items.all %}
+                                    <td class="px-6 py-4 border-b border-gray-300">
+                                        <div class="flex items-center">
+                                            <img class="h-10 w-10 object-cover rounded-full" src="{{ item.product.image.url }}" alt="{{ item.product.title }}">
+                                            <span class="ml-4">{{ item.product.title }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 border-b border-gray-300">{{ item.quantity }}</td>
+                                    <td class="px-6 py-4 border-b border-gray-300">${{ item.product.get_display_price }}</td>
+                                    <td class="px-6 py-4 border-b border-gray-300">${{ item.get_total_price }}</td>
+                                    <td class="px-6 py-4 border-b border-gray-300">
+                                        {% if item.status == "ordered" %}
+                                            <p class="inline-block px-4 py-2 text-white font-semibold rounded-full bg-yellow-500">
+                                                {{ item.status|capfirst }}
+                                            </p>
+                                        {% elif item.status == "shipped" %}
+                                            <p class="inline-block px-4 py-2 text-white font-semibold rounded-full bg-green-500">
+                                                {{ item.status|capfirst }}
+                                            </p>
+                                        {% elif item.status == "rejected" %}
+                                            <p class="inline-block px-4 py-2 text-white font-semibold rounded-full bg-red-500">
+                                                {{ item.status|capfirst }}
+                                            </p>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 border-b border-gray-300">{{ item.shiped_date }}</td>
+                                    {% if forloop.first %}
+                                    <td class="px-6 py-4 border-b border-gray-300" rowspan="{{ order.items.count }}">
+                                        <b>${{ order.get_total_price }}</b>
+                                    </td>
+                                    
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                
+                
+                
+                
+
+                {% comment %} Sales orders {% endcomment %}
+                <div id="salesorder-content" class="tab-content hidden">
+                    <h2 class="my-6 text-2xl font-semibold text-gray-900">Pending Orders</h2>
+                    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                        <table class="min-w-full bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Product</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Quantity</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Item Price</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action Date</th>
+                                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700 text-sm">
+                                {% for morder in pending_orders %}
+                                    <tr>
+                                        <td class="px-6 py-4 border-b border-gray-300">
+                                            {{ morder.order.created_at|date:"M d, Y" }}
+                                        </td>
+                                        <td class="px-6 py-4 border-b border-gray-300">
+                                            <a href ="{% url 'item-ordered' oid=morder.order.id otm=morder.id %}">
+                                            <div class="flex items-center">
+                                                <img class="h-10 w-10 object-cover rounded-full" src="{{ morder.product.image.url }}" alt="{{ morder.product.title }}">
+                                                <span class="ml-4">{{ morder.product.title }}</span>
+                                            </div>
+                                            </a>
+                                        </td>
+                                        <td class="px-6 py-4 border-b border-gray-300">{{ morder.order.user.email }}</td>
+                                        <td class="px-6 py-4 border-b border-gray-300">{{ morder.quantity }}</td>
+                                        <td class="px-6 py-4 border-b border-gray-300">${{ morder.product.price }}</td>
+                                        <td class="px-6 py-4 border-b border-gray-300">
+                                            <b>${{ morder.get_total_price }}</b>
+                                        </td>
+                                        <td class="px-6 py-4 border-b border-gray-300">
+                                            <b>{{ morder.status|capfirst }}</b>
+                                        </td><td class="px-6 py-4 border-b border-gray-300">
+                                            <b>{{ morder.shiped_date }}</b>
+                                        </td>
+                                        <td class="px-6 py-4 border-b border-gray-300">
+                                            {% if morder.status == "ordered" %}
+                                                <div class="flex space-x-2">
+                                                    <a href="{% url 'approve-order-item' morder.id %}" class="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300">Approve</a>
+                                                    <a href="{% url 'reject-order-item' morder.id %}" class="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Reject</a>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                </div>
+
+            </div>    
+
+            <script type="text/javascript" src="{% static "userprofile/js/tabs.js" %}"></script>
+
+
+
+        </main>
+{% endif %}
